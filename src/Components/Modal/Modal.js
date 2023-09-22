@@ -1,22 +1,19 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Modal} from 'antd';
 
-const CustomModal = ({open, setOpen, children,footer}) => {
+const CustomModal = ({title, open, setOpen, children, footer}) => {
 
-    useEffect(() => {
-        setOpen(open)
-    }, [open])
 
     return (
         <>
             <Modal
-                title="Modal 1000px width"
+                title={title}
                 centered
                 open={open}
                 onOk={() => setOpen(false)}
                 onCancel={() => setOpen(false)}
-                width={1000}
-                footer={[...footer ??[]]}
+                width={800}
+                footer={[...footer ?? []]}
             >
                 {children}
             </Modal>

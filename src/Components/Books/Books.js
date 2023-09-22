@@ -1,10 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {useStore} from "../../Store/Store";
 import {getBooks} from "../../Store/Actions";
-import axios from "axios";
 import CustomCard from "../Card/Card";
 import CustomPageHeader from "../PageHeader/PageHeader";
-import CustomAutoComplete from "../AutoComplete/AutoComplete";
 import CustomModal from "../Modal/Modal";
 import {InfoCircleOutlined, MinusCircleOutlined, PlusCircleOutlined, ShoppingCartOutlined} from "@ant-design/icons";
 import CustomDrawer from "../Drawer/Drwaer";
@@ -14,6 +12,10 @@ import styled from 'styled-components'
 import {Cart} from "../Cart/Cart";
 import {paymentFormFields} from "../Form/PaymentForm";
 import CustomForm from "../Form/Form";
+import SearchBox from "../SearchBox/SearchBox";
+import useInfiniteScroll from "../inifinteScroll/inifinteScroll";
+import Spinner from "../Spinner/Spinner";
+import {noBooksFound} from "../../Utils/Utils";
 
 
 const BooksCardsContainer = styled.div`
@@ -23,6 +25,18 @@ const BooksCardsContainer = styled.div`
   flex-wrap: wrap;
   padding: 10px
 `
+const SpinnerFetchingContainer = styled.div`
+  text-align: center;
+  padding: 30px;
+`
+const SpinnerLoadingContainer = styled.div`
+  text-align: center;
+  padding: 30px;
+`
+const NoBookFoundContainer = styled.div`
+  text-align: center;
+  width: 100%;
+`
 const BooksContainer = styled.div``
 const Books = () => {
     const {state, dispatch} = useStore()
@@ -30,19 +44,28 @@ const Books = () => {
     const [selectedBook, setSelectedBook] = useState(false)
     const [drawer, setDrawer] = useState(false);
     const [isPayment, setIsPayment] = useState(false)
+    const [loading, setLoading] = useState(false)
 
+
+    const fetchItems = async () => {
+        return await getBooks({
+            dispatch: dispatch,
+            searchTerm: state.searchTerm ?? '',
+            startIndex: state.startIndex ?? 0,
+            pagesPerCall: state.pagesPerCall
+        })
+    }
     useEffect(() => {
-        getBooks(dispatch)
+        if (loading) return;
+        setLoading(true)
+        fetchItems().then(() => {
+            setIsFetching(false);
+            setLoading(false)
+        })
     }, [])
 
-    function fetchData(searchTerm) {
-        return getBooks(dispatch, searchTerm)
-        return axios.get(
-            `https://www.omdbapi.com?s=${searchTerm}&apikey=6a6f53dc`,
-        ).then(res => {
-            return !res?.data?.Search ? [] : res.data.Search.map((m, i) => ({key: i, value: m.Title}))
-        });
-    }
+    const [isFetching, setIsFetching] = useInfiniteScroll(fetchItems);
+
 
     const cardActions = [
         {
@@ -66,15 +89,12 @@ const Books = () => {
 
     return (
         <BooksContainer>
-            <CustomPageHeader>
-                <CustomAutoComplete
-                    callback={fetchData}
-                    optionsArr={[
-                        {key: 1, value: "Bill Gates"},
-                        {key: 2, value: "Jane Doe"}
-                    ]}/>
-            </CustomPageHeader>
 
+            <CustomPageHeader><SearchBox/></CustomPageHeader>
+            {loading && <SpinnerLoadingContainer><Spinner/></SpinnerLoadingContainer>}
+            {!loading && books.length === 0 &&
+            <NoBookFoundContainer><img width={400} src={noBooksFound} alt={'no_books_found'}/></NoBookFoundContainer>}
+            }
 
             <CustomModal open={selectedBook} setOpen={setSelectedBook}>
                 <BookPreview book={selectedBook} dispatch={dispatch}/>
@@ -106,6 +126,8 @@ const Books = () => {
             }
 
             {drawer && <CustomDrawer drawer={drawer} setDrawer={setDrawer} data={books}/>}
+            {isFetching && <SpinnerFetchingContainer><Spinner/></SpinnerFetchingContainer>}
+
         </BooksContainer>
     )
 }

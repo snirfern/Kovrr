@@ -1,9 +1,17 @@
 import React from 'react';
-import {Badge, Button, List, Space} from "antd";
-import {DollarOutlined, ShoppingCartOutlined} from '@ant-design/icons';
+import {Badge, Button, Divider, List, Space} from "antd";
+import {
+    BookOutlined,
+    DollarOutlined,
+    LikeOutlined,
+    MessageOutlined,
+    ReadOutlined,
+    ShoppingCartOutlined
+} from '@ant-design/icons';
 import Avatar from "antd/es/avatar/avatar";
 import {useStore} from "../../Store/Store";
 import styled from 'styled-components'
+import {imageNotFoundUrl} from "../../Utils/Utils";
 
 const CartFooter = styled.div`
   text-align: center;
@@ -12,23 +20,38 @@ const ItemsSummary = styled.div`
   display: flex;
   padding: 10px;
   justify-content: center;
-  width: 50px;
 `
-const IconText = ({icon, text}) => (
-    <Space>
+const Total = styled.div`
+  font-weight: 500;
+  padding: 5px;
+  color: black;
+`
+const IconTextSpan = styled.span`
+{
+  color: #000000;
+  font-weight: 500
+}
+`
+const CartPaymentButton = styled(Button)`
+  background: #00b96b;
+  color: white;
+`
+const IconText = ({icon, text, style}) => (
+    <Space style={{fontSize: 15, ...style ?? {}}}>
         {React.createElement(icon)}
         {text}
     </Space>
 );
 const Cart = ({withFooter, approveCallback}) => {
     const {state} = useStore()
-    const {books, cart} = state
+    const {books, cart, totalPayment} = state
+
     return (
         <>
             <List
                 itemLayout="vertical"
                 size="large"
-                dataSource={books.filter(cB => cart[cB.id])}
+                dataSource={Array.from(new Set(books.filter(cB => cart[cB.id])))}
 
                 renderItem={(item) => (
                     <List.Item
@@ -36,18 +59,27 @@ const Cart = ({withFooter, approveCallback}) => {
                         style={{padding: 30}}
                         key={item.title}
                         actions={[
-                            <IconText icon={ShoppingCartOutlined} text={item.price * cart[item.id].toFixed(2)}
-                                      key="items_total"}
-                            <IconText icon={ReadOutlined} text="156" key="list-vertical-star-o"/>,
-                            <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o"/>,
-                            <IconText icon={MessageOutlined} text="2" key="list-vertical-message"/>,
-                            ]}
+                            <IconText icon={BookOutlined} text={`${item.price} $`} key="156" style={{color: 'black'}}/>,
+
+                            <IconText icon={ShoppingCartOutlined}
+                                      text={
+                                          <IconTextSpan>{`${(item.price * cart[item.id].toFixed(2))} $`}</IconTextSpan>}
+                                      key="items_total"
+                                      style={{color: 'black'}}
+                            />,
+                            <IconText icon={ReadOutlined} text="156" key="list-vertical-star-o"
+                                      style={{color: 'black'}}/>,
+                            <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o"
+                                      style={{color: 'black'}}/>,
+                            <IconText icon={MessageOutlined} text="2" key="list-vertical-message"
+                                      style={{color: 'black'}}/>,
+                        ]}
                         extra={
                             <img
                                 width={100}
                                 height={100}
                                 alt="logo"
-                                src={item.thumbnail}
+                                src={item?.thumbnail ?? imageNotFoundUrl}
                             />
                         }
                     >
@@ -66,20 +98,22 @@ const Cart = ({withFooter, approveCallback}) => {
                 )}
             />
             {withFooter && <CartFooter>
+                <Divider/>
+
                 <ItemsSummary>
-                    <div>Total:</div>
-                    <div>12</div>
+                    <Total>Total:</Total>
+                    <Total>{`   ${totalPayment}  $`}</Total>
                 </ItemsSummary>
-                <Button icon={<DollarOutlined/>} style={{background: '#00b96b', color: 'white'}}
-                        onClick={() => approveCallback()}>
+
+                <CartPaymentButton
+                    icon={<DollarOutlined/>}
+                    onClick={() => approveCallback()}
+                >
                     Proceed to Payment
-                </Button>
+                </CartPaymentButton>
             </CartFooter>}
         </>
     )
 
 }
-export
-{
-    Cart, IconText
-}
+export {Cart, IconText}

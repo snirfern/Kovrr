@@ -1,47 +1,42 @@
 import axios from "axios";
+import {buildApiQuery} from "../Utils/Utils";
 
+const apiHigherBoundLimit = 40
+const buildPromise = ({searchTerm, startIndex, pagesPerCall}) => {
+    const query = buildApiQuery({searchTerm, startIndex, pagesPerCall})
 
-export const checkCreditCard = (dispatch, card) => {
-    dispatch({type: "LOADING", payload: true});
-    axios({
-        method: "POST",
-        url: "http://192.168.1.13:3000/validateCreditCard",
-        data: {cc: card},
-    })
-        .then(function (response) {
-            if (
-                response &&
-                response.data &&
-                response.data.success &&
-                card.card_number &&
-                card.card_number.length > 0
-            )
-                dispatch({
-                    type: "SET_CREDIT_CARD",
-                    payload: card.card_number.toString().substring(0, 4),
-                });
-            else dispatch({type: "SET_CREDIT_CARD", payload: false});
-
-            dispatch({type: "LOADING", payload: false});
-        })
-        .catch((e) => {
-            console.log(e);
-            dispatch({action: "LOADING", payload: false});
-
-            console.log(e);
-        });
-};
-
-export const getData = (dispatch) => {
-    axios({
-        url: "http://192.168.1.13:3000/menu",
+    return axios({
+        url: `${process.env.REACT_APP_BOOKS_API}${query}`,
         method: 'GET'
     })
+}
+export const getBooks = ({dispatch, searchTerm, startIndex, pagesPerCall, isNewSearchTerm = false}) => {
+    const promises = [
+        buildPromise({
+            searchTerm: searchTerm,
+            startIndex: startIndex,
+            pagesPerCall: pagesPerCall > apiHigherBoundLimit ? apiHigherBoundLimit : pagesPerCall
+        })
+    ]
+
+    if (pagesPerCall > apiHigherBoundLimit) {
+        promises.push(
+            buildPromise({
+                searchTerm: searchTerm,
+                startIndex: startIndex + apiHigherBoundLimit,
+                pagesPerCall: 10
+            })
+        )
+    }
+    return Promise.all(promises)
         .then(function (response) {
-            dispatch({type: "GET_DATA", payload: response.data});
+            const data = response.reduce((a, promiseRes) => a.concat(promiseRes.data.items ?? []), [])
+            dispatch({type: "GET_BOOKS", payload: {isNewSearchTerm: isNewSearchTerm, data: data}});
+            return 1
         })
         .catch(function (error) {
             console.log(error);
+            return -1
         });
 };
 

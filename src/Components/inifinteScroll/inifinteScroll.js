@@ -10,15 +10,15 @@ const useInfiniteScroll = (callback) => {
             if (totalScreenHeight < offsetHeight || isFetching) return;
             setIsFetching(true);
         }
+
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isFetching]);
 
     useEffect(() => {
         if (!isFetching) return;
-        callback();
-    }, [isFetching,callback]);
-
+        callback().then(() => setIsFetching(false))
+    }, [isFetching, callback]);
 
 
     return [isFetching, setIsFetching];
