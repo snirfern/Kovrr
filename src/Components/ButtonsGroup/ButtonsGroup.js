@@ -6,12 +6,13 @@ const CustomButtonsGroup = ({buttons, defaultValue}) => {
 
     useEffect(() => {
         setSelected(defaultValue ?? null)
+        // eslint-disable-next-line
     }, [])
 
     return (
         <Radio.Group value={selected}>
-            {buttons.map(button => (
-                <Radio.Button value={button.value} onClick={() => {
+            {buttons.map((button,i) => (
+                <Radio.Button key={`button_group_${i}`} value={button.value} onClick={() => {
                     setSelected(button.value);
                     if (button.onClick) {
                         button.onClick()

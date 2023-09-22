@@ -35,7 +35,7 @@ const reducer = (state, action) => {
         case 'ADD_CART_ITEM': {
 
             const itemId = action.payload.id
-            const totalPayment = Number(state.totalPayment) + Number(action.payload.price)
+            const totalPayment = (Number(state.totalPayment) + Number(action.payload.price)).toFixed(2)
             return {
                 ...state,
                 itemsInCart: state.itemsInCart + 1,

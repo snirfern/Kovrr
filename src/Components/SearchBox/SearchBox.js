@@ -10,7 +10,7 @@ const SearchBoxContainer = styled.div`
   text-align: center;
 `
 
-const SearchBox = ({}) => {
+const SearchBox = () => {
     const {state, dispatch} = useStore()
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
@@ -20,6 +20,7 @@ const SearchBox = ({}) => {
             let debounceFunc = setTimeout(fetchData, 1000);
             return () => clearTimeout(debounceFunc)
         }
+        // eslint-disable-next-line
     }, [searchTerm])
 
 

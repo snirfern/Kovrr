@@ -15,12 +15,17 @@ const FormFooter = styled.div`
 
 const CustomForm = ({fields}) => {
     const [form] = Form.useForm();
+    const [formData, setFormData] = useState({})
     const [isDisabled, setIsDisabled] = useState(true);
 
 
-    const onValuesChange = () => {
-        setIsDisabled(form.getFieldsError().some((item) => item.errors.length > 0))
+    const onValuesChange = async (values) => {
+        setFormData({...formData, ...values})
+        const isFormValid = fields.every(f => !!(formData[f.name] && f.validate(formData[f.name])))
+
+        setIsDisabled(!isFormValid)
     }
+
     return (
         <FormContainer>
 
@@ -33,33 +38,32 @@ const CustomForm = ({fields}) => {
                 onValuesChange={onValuesChange}
 
             >
-                {fields.map(cF => {
+                {fields.map((cF, i) => {
                     return (
-
                         <Form.Item
                             hasFeedback
+
+                            key={`form_field_${i}`}
                             name={cF.name}
                             label={cF.label}
                             rules={cF.validations}
                         >
-
                             <Input/>
                         </Form.Item>
                     )
                 })}
 
-                <FormFooter>
-                    <Form.Item>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            disabled={isDisabled}
-                        >
-                            Submit
-                        </Button>
-                    </Form.Item>
-                </FormFooter>
+
             </Form>
+            <FormFooter>
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={isDisabled}
+                >
+                    Submit
+                </Button>
+            </FormFooter>
         </FormContainer>
     )
 }

@@ -63,7 +63,7 @@ const Cart = ({withFooter, approveCallback}) => {
 
                             <IconText icon={ShoppingCartOutlined}
                                       text={
-                                          <IconTextSpan>{`${(item.price * cart[item.id].toFixed(2))} $`}</IconTextSpan>}
+                                          <IconTextSpan>{`${(item.price * cart[item.id]).toFixed(2)} $`}</IconTextSpan>}
                                       key="items_total"
                                       style={{color: 'black'}}
                             />,
@@ -102,7 +102,7 @@ const Cart = ({withFooter, approveCallback}) => {
 
                 <ItemsSummary>
                     <Total>Total:</Total>
-                    <Total>{`   ${totalPayment}  $`}</Total>
+                    <Total>{`   ${Number(totalPayment).toFixed(2)}  $`}</Total>
                 </ItemsSummary>
 
                 <CartPaymentButton

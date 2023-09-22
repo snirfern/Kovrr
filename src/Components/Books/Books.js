@@ -62,6 +62,7 @@ const Books = () => {
             setIsFetching(false);
             setLoading(false)
         })
+        // eslint-disable-next-line
     }, [])
 
     const [isFetching, setIsFetching] = useInfiniteScroll(fetchItems);
@@ -109,8 +110,9 @@ const Books = () => {
             }
 
             <BooksCardsContainer>
-                {books.map(cB => {
+                {books.map((cB,i) => {
                     return <CustomCard
+                        key={`books_container_${i}`}
                         dispatch={dispatch}
                         data={cB}
                         actions={cardActions}
